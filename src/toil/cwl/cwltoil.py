@@ -324,7 +324,7 @@ class ToilFsAccess(cwltool.stdfsaccess.StdFsAccess):
 
     def _abs(self, path):
         if path.startswith("toilfs:"):
-            return self.file_store.readGlobalFile(FileID.unpack(path[7:]))
+            return self.file_store.readGlobalFile(FileID.unpack(path[7:]), symlink=True)
         return super(ToilFsAccess, self)._abs(path)
 
 
@@ -333,7 +333,7 @@ def toil_get_file(file_store, index, existing, file_store_id):
 
     if not file_store_id.startswith("toilfs:"):
         return file_store.jobStore.getPublicUrl(file_store.jobStore.importFile(file_store_id))
-    src_path = file_store.readGlobalFile(FileID.unpack(file_store_id[7:]))
+    src_path = file_store.readGlobalFile(FileID.unpack(file_store_id[7:]), symlink=True)
     index[src_path] = file_store_id
     existing[file_store_id] = src_path
     return schema_salad.ref_resolver.file_uri(src_path)
