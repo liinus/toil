@@ -854,6 +854,7 @@ class FileJobStore(AbstractJobStore):
 
         :rtype :string, string is the absolute path to a directory to put the file in.
         """
+        temp_directory = None
         if jobStoreID != None:
             # Make a temporary file within the job's files directory
 
@@ -869,7 +870,13 @@ class FileJobStore(AbstractJobStore):
             mkdir_p(jobFilesDir)
             
             # Then make a temp directory inside it
-            return tempfile.mkdtemp(prefix='file-', dir=jobFilesDir)
+            temp_directory = tempfile.mkdtemp(prefix='file-', dir=jobFilesDir)
         else:
             # Make a temporary file within the non-job-associated files hierarchy
-            return tempfile.mkdtemp(prefix='file-', dir=self._getArbitraryFilesDir())
+            temp_directory = tempfile.mkdtemp(prefix='file-', dir=self._getArbitraryFilesDir())
+
+        # Docker requires read access to full path in order to bind mount a symlink
+        os.chmod(temp_directory, 0o701)
+
+        return temp_directory
+
